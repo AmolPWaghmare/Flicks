@@ -111,9 +111,22 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         cell.titleLabel?.text = title
         cell.overviewLabel?.text = overview
+        var votes = movie["vote_average"] as! Double
+        votes = votes * 10.0
+        let userScore = Int(votes)
+        cell.userScore?.text = String(userScore) + "%"
         cell.posterView.setImageWith(posterFullURL!)
+        //cell.selectionStyle = .none
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.white
+        cell.selectedBackgroundView = backgroundView
+        
         return cell;
         
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -127,6 +140,27 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let backdropFullURL =  URL(string: baseURL + backdropPath)
         
         detailsViewController.imageURL = backdropFullURL
+        
+        detailsViewController.titleLabelText = movie["title"] as! String
+        detailsViewController.overviewLabelText = movie["overview"] as! String
+        
+        var votes = movie["vote_average"] as! Double
+        votes = votes * 10.0
+        let userScore = Int(votes)
+        
+        detailsViewController.scoreLabelText = String(userScore) + "%"
+        
+        let dateFormatterFromAPI = DateFormatter()
+        dateFormatterFromAPI.dateFormat = "yyyy-MM-dd"
+        
+        let dateFormatterDisplay = DateFormatter()
+        dateFormatterDisplay.dateFormat = "MMM dd,yyyy"
+        
+        let releaseDate = movie["release_date"] as! String
+        let date: Date? = dateFormatterFromAPI.date(from: releaseDate)
+        
+        detailsViewController.releaseDateLabelText = dateFormatterDisplay.string(from: date!)
+        
     }
     
 

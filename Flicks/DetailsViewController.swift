@@ -12,13 +12,27 @@ class DetailsViewController: UIViewController {
 
     @IBOutlet weak var backdropImage: UIImageView!
     
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var scoreLabel: UILabel!
+    @IBOutlet weak var overviewLabel: UILabel!
+    @IBOutlet weak var releaseDateLabel: UILabel!
+    
     var imageURL : URL!
-
+    var titleLabelText : String!
+    var scoreLabelText : String!
+    var overviewLabelText : String!
+    var releaseDateLabelText : String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         backdropImage.setImageWith(imageURL)
+        
+        titleLabel?.text = titleLabelText
+        scoreLabel?.text = scoreLabelText
+        overviewLabel?.text = overviewLabelText
+        releaseDateLabel?.text = releaseDateLabelText
+        
         // Do any additional setup after loading the view.
     }
 
