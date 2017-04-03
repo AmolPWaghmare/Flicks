@@ -10,11 +10,13 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
+    @IBOutlet weak var searchView: UISearchBar!
     @IBOutlet weak var errorView: UIView!
     @IBOutlet weak var tableView: UITableView!
     var movies : [NSDictionary]?
+    var AllMovies : [NSDictionary]?
     
     
     override func viewDidLoad() {
@@ -28,6 +30,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         refreshControl.addTarget(self, action: #selector(MoviesViewController.refreshData(_:)), for: UIControlEvents.valueChanged)
         // add refresh control to table view
         tableView.insertSubview(refreshControl, at: 0)
+        
+        searchView.showsCancelButton = true
 
         getData(refreshControl);
     }
@@ -57,11 +61,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                 if let data = data {
                     if let responseDictionary = try! JSONSerialization.jsonObject(
                         with: data, options:[]) as? NSDictionary {
-                        //print("responseDictionary: \(responseDictionary)")
-                        
-                        // Recall there are two fields in the response dictionary, 'meta' and 'response'.
-                        // This is how we get the 'response' field
+                       
                         self.movies = (responseDictionary["results"] as! [NSDictionary])
+                        self.AllMovies = (responseDictionary["results"] as! [NSDictionary])
                         
                         self.tableView.reloadData()
                         MBProgressHUD.hide(for: self.view, animated: true)
@@ -70,9 +72,8 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                         
                         self.errorView.isHidden = true
                         self.tableView.isHidden = false
+                        self.searchView.isHidden = false
                         
-                        // This is where you will store the returned array of posts in your posts property
-                        // self.feeds = responseFieldDictionary["posts"] as! [NSDictionary]
                     }
                 }
                 else {
@@ -163,15 +164,48 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar){
+        searchView.resignFirstResponder()
+        
+        self.movies = self.AllMovies?.filter() {
+            let title = $0["title"] as? String
+            if title?.lowercased().range(of:(searchBar.text?.lowercased())!) != nil{
+                return true
+            }
+            return false
+        }
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.searchView.resignFirstResponder()
+        }
     }
-    */
-
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        self.movies = self.AllMovies?.filter() {
+            let title = $0["title"] as? String
+            if title?.lowercased().range(of:(searchText.lowercased())) != nil{
+                return true
+            }
+            return false
+        }
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            //self.searchView.resignFirstResponder()
+        }
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar)
+    {
+        searchView.resignFirstResponder()
+        searchView.text = ""
+        self.movies = self.AllMovies;
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.searchView.resignFirstResponder()
+        }
+    }
 }
